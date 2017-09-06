@@ -202,7 +202,7 @@ module.exports = class SoundTouchDriver extends Driver {
         })[0]
         if (sourceData) {
           deviceApi.select(sourceData.source, sourceData.sourceAccount, sourceData.location, data => {
-            this.log.debug(deviceAPI.name + ' --> select: ', data)
+            this.log.debug(deviceApi.name + ' --> select: ', data)
             resolve()
           })
         }
