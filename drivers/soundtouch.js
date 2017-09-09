@@ -378,7 +378,11 @@ module.exports = class SoundTouchDriver extends Driver {
   }
 
   setDevicesValue(devices, key, newValue) {
-
+    const actions = []
+    for (let device of devices) {
+      actions.push(this.setDeviceValue(device, key, newValue))
+    }
+    return Promise.all(actions)
   }
 
   unload() {
