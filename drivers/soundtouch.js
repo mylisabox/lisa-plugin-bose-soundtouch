@@ -112,6 +112,15 @@ module.exports = class SoundTouchDriver extends Driver {
     return presetData ? presetData.ContentItem : { itemName: index }
   }
 
+  _getVolume(deviceApi) {
+    return new Promise((resolve, reject) => {
+      deviceApi.getVolume(data => {
+        resolve(data.volume.actualvolume)
+      })
+      setTimeout(reject, TIMEOUT)
+    })
+  }
+
   _getDeviceData(device) {
     const deviceApi = this.devices[device.privateData.macAddress]
     return new Promise((resolve, reject) => {
@@ -131,13 +140,11 @@ module.exports = class SoundTouchDriver extends Driver {
         resolve(device)
       })
       setTimeout(reject, TIMEOUT)
-    })).then(device => new Promise((resolve, reject) => {
-      deviceApi.getVolume(data => {
-        device.data.volume = data.volume.actualvolume
-        resolve(device)
+    })).then(device => this._getVolume(deviceApi).then(volume => {
+      device.data.volume = volume
+      return Promise.resolve(device)
       })
-      setTimeout(reject, TIMEOUT)
-    })).then(device => new Promise((resolve, reject) => {
+    ).then(device => new Promise((resolve, reject) => {
       deviceApi.isPoweredOn(powerOn => {
         device.data.power = powerOn ? 'on' : 'off'
         resolve(device)
@@ -358,8 +365,17 @@ module.exports = class SoundTouchDriver extends Driver {
       else if (key === 'preset') {
         return this._setPreset(deviceApi, newValue)
       }
+      else if (key === 'source') {
+        return this._setSource(deviceApi, newValue)
+      }
       else if (key === 'volume') {
         return this._setVolume(deviceApi, newValue)
+      }
+      else if (key === 'increase_volume') {
+        return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) + newValue))
+      }
+      else if (key === 'decrease_volume') {
+        return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) - newValue))
       }
       else if (key === 'playpause') {
         return this._playPausePlayer(deviceApi, newValue)
@@ -368,10 +384,10 @@ module.exports = class SoundTouchDriver extends Driver {
         return this._stopPlayer(deviceApi)
       }
       else if (key === 'next') {
-        return this._nextPlayer(deviceApi, newValue)
+        return this._nextPlayer(deviceApi)
       }
       else if (key === 'previous') {
-        return this._previousPlayer(deviceApi, newValue)
+        return this._previousPlayer(deviceApi)
       }
     }
     return Promise.reject()
