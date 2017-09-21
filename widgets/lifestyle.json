@@ -4,13 +4,32 @@
   "widgetHeight": 2,
   "children": [
     {
-      "type": "image-button",
-      "name": "power",
-      "value": "power",
-      "values": {
-        "on": "/images/widgets/outlet_on.png",
-        "off": "/images/widgets/outlet_off.png"
-      }
+      "type": "hbox",
+      "children": [
+        {
+          "type": "image-button",
+          "name": "power",
+          "value": "power",
+          "values": {
+            "on": "/images/widgets/outlet_on.png",
+            "off": "/images/widgets/outlet_off.png"
+          }
+        },
+        {
+          "type": "vbox",
+          "children": [
+            {
+              "type": "label",
+              "name": "power",
+              "value": "power",
+              "values": {
+                "on": "/images/widgets/outlet_on.png",
+                "off": "/images/widgets/outlet_off.png"
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "hbox",
