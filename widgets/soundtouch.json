@@ -66,7 +66,7 @@
     },
     {
       "type": "space",
-      "flex": 0.1
+      "flex": 0.2
     },
     {
       "type": "hbox",
@@ -99,18 +99,10 @@
       ]
     },
     {
-      "type": "space",
-      "flex": 0.1
-    },
-    {
       "type": "slider",
       "name": "volume",
       "value": "volume",
-      "flex": 0.2
-    },
-    {
-      "type": "space",
-      "flex": 0.1
+      "flex": 0.8
     }
   ]
 }
