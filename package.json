@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "lisa-plugin": "^0.0.15",
-    "lisa-bose-soundtouch": "^1.0.4"
+    "lisa-bose-soundtouch": "^1.0.5"
   },
   "devDependencies": {
     "eslint": "^3.10.2",
