@@ -65,7 +65,7 @@ module.exports = class SoundTouchDriver extends Driver {
 
   _updateVolume(deviceApi, volumeLevel) {
     return this._findLisaDevice(deviceApi.device['mac_address']).then(device => {
-      if (device && device.data.volume != volumeLevel) {
+      if (device && device.data.volume !== volumeLevel) {
         device.data.volume = volumeLevel
         return this._updateData(device)
       }
@@ -74,7 +74,7 @@ module.exports = class SoundTouchDriver extends Driver {
 
   _updatePower(deviceApi, powerOn) {
     return this._findLisaDevice(deviceApi.device['mac_address']).then(device => {
-      if (device && ((device.data.power === 'on') != powerOn)) {
+      if (device && ((device.data.power === 'on') !== powerOn)) {
         device.data.power = powerOn ? 'on' : 'off'
         return this._updateData(device)
       }
@@ -152,9 +152,8 @@ module.exports = class SoundTouchDriver extends Driver {
       setTimeout(reject, TIMEOUT)
     })).then(device => new Promise((resolve, reject) => {
       deviceApi.getNowPlaying(data => {
-        device.data.isPlaying = data.nowPlaying.ContentItem.source === 'STANDBY' ?
-          false : data.nowPlaying.ContentItem
-        device.data.state = device.data.isPlaying ? 'play' : 'pause'
+        device.data.isPlaying = data.nowPlaying.playStatus === 'PLAY_STATE'
+        device.data.state = device.data.isPlaying ? 'pause' : 'play'
         resolve(device)
       })
       setTimeout(reject, TIMEOUT)
