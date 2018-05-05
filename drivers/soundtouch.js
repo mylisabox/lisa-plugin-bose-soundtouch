@@ -14,52 +14,62 @@ module.exports = class SoundTouchDriver extends Driver {
 
   init() {
     this.devices = {}
-    soundTouchDiscovery.search(deviceAPI => {
-      this.devices[deviceAPI.device['mac_address']] = deviceAPI
-      deviceAPI.socketStart()
-      const log = this.log
-      deviceAPI.getInfo(json => {
-        deviceAPI.device.infos = json.info
-        deviceAPI.device.realtime = {}
-      })
-
-      deviceAPI.setPoweredListener((poweredOn, json) => {
-        if (deviceAPI.device.realtime.power !== poweredOn) {
-          this._updatePower(deviceAPI, poweredOn)
+    this.log.debug('BOSE INIT ' + this.constructor.name + ' ' + this.type + (this.isInitDone ? 'initialized' : 'nope'))
+    const wantedType = this.type
+    if (!this.isInitDone) {
+      this.isInitDone = true
+      soundTouchDiscovery.search(deviceAPI => {
+        if (!deviceAPI.device.fullname.toLowerCase().startsWith(wantedType)) {
+          return
         }
-        deviceAPI.device.realtime.power = poweredOn
-        deviceAPI.device.realtime.nowPlaying = json
-        log.debug(poweredOn ? 'Powered On' : 'Powered Off')
+
+        this.devices[deviceAPI.device['mac_address']] = deviceAPI
+        deviceAPI.socketStart()
+        const log = this.log
+        deviceAPI.getInfo(json => {
+          deviceAPI.device.infos = json.info
+          deviceAPI.device.realtime = {}
+        })
+
+        deviceAPI.setPoweredListener((poweredOn, json) => {
+          if (deviceAPI.device.realtime.power !== poweredOn) {
+            this._updatePower(deviceAPI, poweredOn)
+          }
+          deviceAPI.device.realtime.power = poweredOn
+          deviceAPI.device.realtime.nowPlaying = json
+          log.debug(poweredOn ? 'Powered On' : 'Powered Off')
+        })
+
+        deviceAPI.setIsPlayingListener((isPlaying, json) => {
+          if (deviceAPI.device.realtime.isPlaying !== isPlaying) {
+            this._updatePlaying(deviceAPI, json)
+          }
+          deviceAPI.device.realtime.isPlaying = isPlaying
+          deviceAPI.device.realtime.nowPlaying = json
+          log.debug(isPlaying ? 'Playing' : 'Not playing')
+        })
+
+        deviceAPI.setVolumeUpdatedListener((volume, json) => {
+          log.debug("VOLUME UPDATED", volume, json)
+          if (deviceAPI.device.realtime.volume !== volume) {
+            this._updateVolume(deviceAPI, volume)
+          }
+          deviceAPI.device.realtime.volume = volume
+        })
+
+        /*
+        deviceAPI.setNowPlayingUpdatedListener(json => {
+          log.debug("NOW PLAYING UPDATED", json.nowPlaying.ContentItem)
+
+        })*/
+
+        deviceAPI.setNowSelectionUpdatedListener(json => {
+          //log.debug("NOW SELECTION UPDATED", json)
+          this._updateSelection(deviceAPI, json.preset.ContentItem)
+        })
+
       })
-
-      deviceAPI.setIsPlayingListener((isPlaying, json) => {
-        if (deviceAPI.device.realtime.isPlaying !== isPlaying) {
-          this._updatePlaying(deviceAPI, json)
-        }
-        deviceAPI.device.realtime.isPlaying = isPlaying
-        deviceAPI.device.realtime.nowPlaying = json
-        log.debug(isPlaying ? 'Playing' : 'Not playing')
-      })
-
-      deviceAPI.setVolumeUpdatedListener((volume, json) => {
-        log.debug("VOLUME UPDATED", volume, json)
-        if (deviceAPI.device.realtime.volume !== volume) {
-          this._updateVolume(deviceAPI, volume)
-        }
-        deviceAPI.device.realtime.volume = volume
-      })
-
-      deviceAPI.setNowPlayingUpdatedListener(json => {
-        log.debug("NOW PLAYING UPDATED", json.nowPlaying.ContentItem)
-
-      })
-
-      deviceAPI.setNowSelectionUpdatedListener(json => {
-        //log.debug("NOW SELECTION UPDATED", json)
-        this._updateSelection(deviceAPI, json.preset.ContentItem)
-      })
-
-    })
+    }
     return Promise.resolve()
   }
 

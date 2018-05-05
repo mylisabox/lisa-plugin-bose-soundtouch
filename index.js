@@ -73,7 +73,18 @@ module.exports = class SoundTouchPlugin extends Plugin {
     if (room) {
       criteria.roomId = room.id
       return this.lisa.findDevices(criteria).then(devices => {
-        return this.drivers['soundtouch'].setDevicesValue(devices, key, value)
+        const data = {
+          lifestyle: [],
+          soundtouch: []
+        }
+        for (let i = 0; i < devices.length; i++) {
+          const deviceBose = devices[i];
+          data[deviceBose.driver].push(deviceBose)
+        }
+        return Promise.all([
+          this.drivers['soundtouch'].setDevicesValue(data.soundtouch, key, value),
+          this.drivers['lifestyle'].setDevicesValue(data.lifestyle, key, value)
+        ])
       })
     }
     else if (device) {
