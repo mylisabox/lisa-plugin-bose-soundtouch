@@ -16,10 +16,21 @@ module.exports = class SoundTouchPlugin extends Plugin {
     if (device && device.pluginName !== this.fullName) {
       return Promise.resolve()
     }
-    const volume = infos.fields.number
+    const number = infos.fields.number
     let key
     let value
     switch (action) {
+      case 'SET_CHANNEL':
+        key = 'preset'
+        value = infos.fields.channel
+        break
+      case 'SET_SOURCE':
+        key = 'source'
+        value = infos.fields.source
+        if (infos.fields.index) {
+          value += '_' + infos.fields.index
+        }
+        break
       case 'DEVICE_TURN_ON':
         key = 'power'
         value = 'on'
@@ -34,17 +45,17 @@ module.exports = class SoundTouchPlugin extends Plugin {
         break
       case "SET_VOLUME":
         key = 'volume'
-        value = volume
+        value = number
         break
       case "INCREASE_VOLUME_AGAIN":
       case "INCREASE_VOLUME":
         key = 'increase_volume'
-        value = volume
+        value = number
         break
       case "DECREASE_VOLUME_AGAIN":
       case "DECREASE_VOLUME":
         key = 'decrease_volume'
-        value = volume
+        value = number
         break
       case "PAUSE_MEDIA_CENTER":
         key = 'playpause'
@@ -71,7 +82,7 @@ module.exports = class SoundTouchPlugin extends Plugin {
 
     const criteria = {}
     if (room) {
-      criteria.roomId = room.id
+      criteria.roomId = room.id || room
       return this.lisa.findDevices(criteria).then(devices => {
         const data = {
           lifestyle: [],

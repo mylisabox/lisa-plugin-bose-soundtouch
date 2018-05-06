@@ -3,7 +3,6 @@
 const Driver = require('lisa-plugin').Driver
 const soundTouchDiscovery = require('lisa-bose-soundtouch/discovery')
 const soundTouchTemplate = require('../widgets/soundtouch.json')
-const TIMEOUT = 1000
 
 module.exports = class SoundTouchDriver extends Driver {
   constructor(lisa, plugin) {
@@ -14,7 +13,7 @@ module.exports = class SoundTouchDriver extends Driver {
 
   init() {
     this.devices = {}
-    this.log.debug('BOSE INIT ' + this.constructor.name + ' ' + this.type + (this.isInitDone ? 'initialized' : 'nope'))
+
     const wantedType = this.type
     if (!this.isInitDone) {
       this.isInitDone = true
@@ -125,9 +124,13 @@ module.exports = class SoundTouchDriver extends Driver {
   _getVolume(deviceApi) {
     return new Promise((resolve, reject) => {
       deviceApi.getVolume(data => {
-        resolve(data.volume.actualvolume)
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve(data.volume.actualvolume)
+        }
       })
-      setTimeout(reject, TIMEOUT)
     })
   }
 
@@ -135,21 +138,29 @@ module.exports = class SoundTouchDriver extends Driver {
     const deviceApi = this.devices[device.privateData.macAddress]
     return new Promise((resolve, reject) => {
       deviceApi.getPresets(data => {
-        device.data.preset1 = this._getPresetData(0, data)
-        device.data.preset2 = this._getPresetData(1, data)
-        device.data.preset3 = this._getPresetData(2, data)
-        device.data.preset4 = this._getPresetData(3, data)
-        device.data.preset5 = this._getPresetData(4, data)
-        device.data.preset6 = this._getPresetData(5, data)
-        resolve(device)
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          device.data.preset1 = this._getPresetData(0, data)
+          device.data.preset2 = this._getPresetData(1, data)
+          device.data.preset3 = this._getPresetData(2, data)
+          device.data.preset4 = this._getPresetData(3, data)
+          device.data.preset5 = this._getPresetData(4, data)
+          device.data.preset6 = this._getPresetData(5, data)
+          resolve(device)
+        }
       })
-      setTimeout(reject, TIMEOUT)
     }).then(device => new Promise((resolve, reject) => {
       deviceApi.getSources(data => {
-        device.data.sources = data.sources.sourceItem
-        resolve(device)
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          device.data.sources = data.sources.sourceItem
+          resolve(device)
+        }
       })
-      setTimeout(reject, TIMEOUT)
     })).then(device => this._getVolume(deviceApi).then(volume => {
       device.data.volume = volume
       return Promise.resolve(device)
@@ -159,14 +170,17 @@ module.exports = class SoundTouchDriver extends Driver {
         device.data.power = powerOn ? 'on' : 'off'
         resolve(device)
       })
-      setTimeout(reject, TIMEOUT)
     })).then(device => new Promise((resolve, reject) => {
       deviceApi.getNowPlaying(data => {
-        device.data.isPlaying = data.nowPlaying.playStatus === 'PLAY_STATE'
-        device.data.state = device.data.isPlaying ? 'pause' : 'play'
-        resolve(device)
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          device.data.isPlaying = data.nowPlaying.playStatus === 'PLAY_STATE'
+          device.data.state = device.data.isPlaying ? 'pause' : 'play'
+          resolve(device)
+        }
       })
-      setTimeout(reject, TIMEOUT)
     })).then(device => {
       device.template = this.template
       return this.lisa.createOrUpdateDevices(device).then(() => device)
@@ -176,16 +190,25 @@ module.exports = class SoundTouchDriver extends Driver {
   _togglePower(deviceApi, newValue) {
     return new Promise((resolve, reject) => {
       if (newValue === 'on') {
-        deviceApi.powerOn(() => {
-          resolve()
+        deviceApi.powerOn(data => {
+          if (data.errors && data.errors.error) {
+            reject(data.errors.error)
+          }
+          else {
+            resolve()
+          }
         })
       }
       else {
-        deviceApi.powerOff(() => {
-          resolve()
+        deviceApi.powerOff(data => {
+          if (data.errors && data.errors.error) {
+            reject(data.errors.error)
+          }
+          else {
+            resolve()
+          }
         })
       }
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
@@ -195,13 +218,17 @@ module.exports = class SoundTouchDriver extends Driver {
         if (presetData) {
           presetData = presetData.ContentItem
           deviceApi.select(presetData.source, presetData.type, presetData.sourceAccount, presetData.location, data => {
-            resolve()
+            if (data.errors && data.errors.error) {
+              reject(data.errors.error)
+            }
+            else {
+              resolve()
+            }
           })
         }
         else {
-          resolve()
+          reject(new Error('preset not find'))
         }
-        setTimeout(() => reject(), TIMEOUT)
       })
     )
   }
@@ -209,20 +236,30 @@ module.exports = class SoundTouchDriver extends Driver {
   _setSource(deviceApi, newValue) {
     return new Promise((resolve, reject) => deviceApi.getSources(data => {
         const parts = newValue.split('|')
+      let source = parts[0].toLowerCase()
+      let sourceAccount = parts[1]
+      if (source.startsWith('hdmi_')) {
+        sourceAccount = source.toUpperCase()
+        source = 'product'
+      }
         const sourceData = data.sources.sourceItem.filter(data => {
-          const source = parts[0]
-          const sourceAccount = parts[1]
-          return data.source === source &&
-            (!sourceAccount || sourceAccount && data.sourceAccount === sourceAccount) &&
-            data.status === 'READY'
+          return data.source.toLowerCase() === source &&
+            (!sourceAccount || sourceAccount && data.sourceAccount === sourceAccount)
         })[0]
         if (sourceData) {
-          deviceApi.select(sourceData.source, sourceData.sourceAccount, sourceData.location, data => {
+          deviceApi.select(sourceData.source, sourceData.type || '', sourceData.sourceAccount || '', sourceData.location || '', data => {
             this.log.debug(deviceApi.name + ' --> select: ', data)
-            resolve()
+            if (data.errors && data.errors.error) {
+              reject(data.errors.error)
+            }
+            else {
+              resolve()
+            }
           })
         }
-        setTimeout(() => reject(), TIMEOUT)
+        else {
+          reject(new Error('source not find'))
+        }
       })
     )
   }
@@ -323,80 +360,92 @@ module.exports = class SoundTouchDriver extends Driver {
   _setVolume(deviceApi, volumeLevel) {
     return new Promise((resolve, reject) => {
       deviceApi.setVolume(volumeLevel, data => {
-        resolve()
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve()
+        }
       })
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
   _stopPlayer(deviceApi) {
     return new Promise((resolve, reject) => {
       deviceApi.stop(data => {
-        resolve()
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve()
+        }
       })
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
   _playPausePlayer(deviceApi) {
     return new Promise((resolve, reject) => {
       deviceApi.playPause(data => {
-        resolve()
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve()
+        }
       })
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
   _nextPlayer(deviceApi) {
     return new Promise((resolve, reject) => {
       deviceApi.next(data => {
-        resolve()
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve()
+        }
       })
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
   _previousPlayer(deviceApi) {
     return new Promise((resolve, reject) => {
       deviceApi.previous(data => {
-        resolve()
+        if (data.errors && data.errors.error) {
+          reject(data.errors.error)
+        }
+        else {
+          resolve()
+        }
       })
-      setTimeout(() => reject(), TIMEOUT)
     })
   }
 
   setDeviceValue(device, key, newValue) {
     const deviceApi = this._findRealDevice(device)
     if (deviceApi) {
-      if (key === 'power') {
-        return this._togglePower(deviceApi, newValue)
-      }
-      else if (key === 'preset') {
-        return this._setPreset(deviceApi, newValue)
-      }
-      else if (key === 'source') {
-        return this._setSource(deviceApi, newValue)
-      }
-      else if (key === 'volume') {
-        return this._setVolume(deviceApi, newValue)
-      }
-      else if (key === 'increase_volume') {
-        return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) + newValue))
-      }
-      else if (key === 'decrease_volume') {
-        return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) - newValue))
-      }
-      else if (key === 'playpause') {
-        return this._playPausePlayer(deviceApi, newValue)
-      }
-      else if (key === 'stop') {
-        return this._stopPlayer(deviceApi)
-      }
-      else if (key === 'next') {
-        return this._nextPlayer(deviceApi)
-      }
-      else if (key === 'previous') {
-        return this._previousPlayer(deviceApi)
+      switch (key) {
+        case 'power':
+          return this._togglePower(deviceApi, newValue)
+        case 'preset':
+          return this._setPreset(deviceApi, newValue)
+        case 'source':
+          return this._setSource(deviceApi, newValue)
+        case 'volume':
+          return this._setVolume(deviceApi, newValue)
+        case 'increase_volume':
+          return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) + newValue))
+        case 'decrease_volume':
+          return this._getVolume(deviceApi).then(volume => this._setVolume(deviceApi, parseInt(volume) - newValue))
+        case 'playpause':
+          return this._playPausePlayer(deviceApi, newValue)
+        case 'stop':
+          return this._stopPlayer(deviceApi)
+        case 'next':
+          return this._nextPlayer(deviceApi)
+        case 'previous':
+          return this._previousPlayer(deviceApi)
       }
     }
     return Promise.reject()
