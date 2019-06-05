@@ -1,121 +1,171 @@
 {
-  "type": "vbox",
+  "type": "column",
   "widgetWidth": 1,
   "widgetHeight": 2,
   "children": [
     {
-      "type": "hbox",
+      "type": "row",
+      "flex": 2,
       "children": [
         {
-          "type": "image-button",
-          "name": "power",
-          "value": "power",
+          "type": "image_button",
+          "id": "power",
+          "value": "$power$",
           "values": {
             "on": "/images/widgets/outlet_on.png",
             "off": "/images/widgets/outlet_off.png"
           }
         },
         {
-          "type": "vbox",
+          "type": "column",
           "children": [
             {
-              "type": "label",
-              "name": "power",
-              "value": "power",
-              "values": {
-                "on": "/images/widgets/outlet_on.png",
-                "off": "/images/widgets/outlet_off.png"
-              }
+              "type": "text",
+              "id": "power",
+              "value": "$power$"
             }
           ]
         }
       ]
     },
     {
-      "type": "hbox",
+      "type": "row",
+      "flex": 2,
+      "crossAxisAlignment": 3,
       "children": [
         {
-          "type": "button",
-          "name": "preset",
-          "text": "preset1.itemName",
+          "type": "raised_button",
+          "id": "preset",
+          "padding": {
+            "right": 4,
+            "bottom": 4
+          },
+          "flex": 3,
+          "colorBrightness": 0,
+          "text": "$preset1.itemName$",
           "value": 1
         },
         {
-          "type": "button",
-          "name": "preset",
-          "text": "preset2.itemName",
+          "type": "raised_button",
+          "id": "preset",
+          "padding": {
+            "right": 4,
+            "left": 4,
+            "bottom": 4
+          },
+          "flex": 3,
+          "colorBrightness": 0,
+          "text": "$preset2.itemName$",
           "value": 2
         },
         {
-          "type": "button",
+          "type": "raised_button",
           "name": "preset",
-          "text": "preset3.itemName",
+          "padding": {
+            "left": 4,
+            "bottom": 4
+          },
+          "flex": 3,
+          "colorBrightness": 0,
+          "text": "$preset3.itemName$",
           "value": 3
         }
       ]
     },
     {
-      "type": "hbox",
+      "type": "row",
+      "flex": 2,
+      "crossAxisAlignment": 3,
       "children": [
         {
-          "type": "button",
+          "type": "raised_button",
           "name": "preset",
-          "text": "preset4.itemName",
+          "text": "$preset4.itemName$",
+          "flex": 3,
+          "colorBrightness": 0,
+          "padding": {
+            "right": 4,
+            "top": 4
+          },
           "value": 4
         },
         {
-          "type": "button",
+          "type": "raised_button",
           "name": "preset",
-          "text": "preset5.itemName",
+          "flex": 3,
+          "colorBrightness": 0,
+          "padding": {
+            "right": 4,
+            "left": 4,
+            "top": 4
+          },
+          "text": "$preset5.itemName$",
           "value": 5
         },
         {
-          "type": "button",
+          "type": "raised_button",
           "name": "preset",
-          "text": "preset6.itemName",
+          "flex": 3,
+          "colorBrightness": 0,
+          "padding": {
+            "left": 4,
+            "top": 4
+          },
+          "text": "$preset6.itemName$",
           "value": 6
         }
       ]
     },
     {
-      "type": "space",
-      "flex": 0.2
-    },
-    {
-      "type": "hbox",
-      "flex": 0.5,
+      "type": "row",
+      "flex": 2,
       "children": [
         {
-          "type": "image-button",
-          "name": "previous",
+          "type": "image_button",
+          "id": "previous",
+          "flex": 1,
+          "width": 30,
+          "height": 30,
           "value": "/images/icons/media-step-backward.svg"
         },
         {
-          "type": "image-button",
-          "name": "playpause",
-          "value": "state",
+          "type": "image_button",
+          "flex": 1,
+          "id": "playpause",
+          "width": 30,
+          "height": 30,
+          "value": "$state$",
           "values": {
             "pause": "/images/icons/media-pause.svg",
             "play": "/images/icons/media-play.svg"
           }
         },
         {
-          "type": "image-button",
-          "name": "stop",
+          "type": "image_button",
+          "id": "stop",
+          "width": 30,
+          "height": 30,
+          "flex": 1,
           "value": "/images/icons/media-stop.svg"
         },
         {
-          "type": "image-button",
-          "name": "next",
+          "type": "image_button",
+          "width": 30,
+          "height": 30,
+          "id": "next",
+          "flex": 1,
           "value": "/images/icons/media-step-forward.svg"
         }
       ]
     },
     {
       "type": "slider",
-      "name": "volume",
-      "value": "volume",
-      "flex": 0.8
+      "id": "volume",
+      "value": "$volume$",
+      "min": 0,
+      "max": 100,
+      "divisions": 100,
+      "flex": 1
     }
   ]
 }

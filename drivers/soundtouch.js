@@ -49,7 +49,7 @@ module.exports = class SoundTouchDriver extends Driver {
         })
 
         deviceAPI.setVolumeUpdatedListener((volume, json) => {
-          log.debug("VOLUME UPDATED", volume, json)
+          log.debug('VOLUME UPDATED', volume, json)
           if (deviceAPI.device.realtime.volume !== volume) {
             this._updateVolume(deviceAPI, volume)
           }
@@ -118,7 +118,7 @@ module.exports = class SoundTouchDriver extends Driver {
 
   _getPresetData(index, data) {
     const presetData = data.presets.preset[index]
-    return presetData ? presetData.ContentItem : { itemName: index }
+    return presetData ? {itemName: presetData.ContentItem.itemName.text} : { itemName: index }
   }
 
   _getVolume(deviceApi) {
@@ -128,7 +128,7 @@ module.exports = class SoundTouchDriver extends Driver {
           reject(data.errors.error)
         }
         else {
-          resolve(data.volume.actualvolume)
+          resolve(parseInt(data.volume.actualvolume.text))
         }
       })
     })
@@ -176,7 +176,7 @@ module.exports = class SoundTouchDriver extends Driver {
           reject(data.errors.error)
         }
         else {
-          device.data.isPlaying = data.nowPlaying.playStatus === 'PLAY_STATE'
+          device.data.isPlaying = data.nowPlaying.playStatus && data.nowPlaying.playStatus.text === 'PLAY_STATE'
           device.data.state = device.data.isPlaying ? 'pause' : 'play'
           resolve(device)
         }
@@ -217,7 +217,7 @@ module.exports = class SoundTouchDriver extends Driver {
         let presetData = data.presets.preset[newValue - 1]
         if (presetData) {
           presetData = presetData.ContentItem
-          deviceApi.select(presetData.source, presetData.type, presetData.sourceAccount, presetData.location, data => {
+          deviceApi.select(presetData.attributes.source, presetData.attributes.type, presetData.attributes.sourceAccount, presetData.attributes.location, data => {
             if (data.errors && data.errors.error) {
               reject(data.errors.error)
             }
@@ -304,7 +304,7 @@ module.exports = class SoundTouchDriver extends Driver {
         continue
       }
 
-      if (deviceApi.device.infos && deviceApi.device.infos.type.toLowerCase().indexOf(this.type) !== -1) {
+      if (deviceApi.device.infos && deviceApi.device.infos.type.text.toLowerCase().indexOf(this.type) !== -1) {
         pairingDevices.push({
           name: deviceApi.name,
           image: '',
