@@ -11,7 +11,7 @@ module.exports = [
     driver: 'soundtouch',
     pairing: 'custom',
     image: 'soundtouch.jpg',
-    settings: []
+    settings: null
   },
   {
     name: {
@@ -25,6 +25,6 @@ module.exports = [
     driver: 'lifestyle',
     pairing: 'custom',
     image: 'lifestyle.png',
-    settings: []
+    settings: null
   }
 ]

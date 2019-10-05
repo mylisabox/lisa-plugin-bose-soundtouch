@@ -8,6 +8,7 @@ module.exports = class SoundTouchDriver extends Driver {
   constructor(lisa, plugin) {
     super(lisa, plugin)
     this.type = 'soundtouch'
+    this.devices = {}
     this.template = soundTouchTemplate
   }
 
@@ -136,6 +137,9 @@ module.exports = class SoundTouchDriver extends Driver {
 
   _getDeviceData(device) {
     const deviceApi = this.devices[device.privateData.macAddress]
+    if(deviceApi == null) {//no connection to device, return cache values
+      return Promise.resolve(device);
+    }
     return new Promise((resolve, reject) => {
       deviceApi.getPresets(data => {
         if (data.errors && data.errors.error) {
