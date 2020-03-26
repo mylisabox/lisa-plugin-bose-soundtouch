@@ -161,7 +161,9 @@ module.exports = class SoundTouchDriver extends Driver {
                     reject(data.errors.error)
                 }
                 else {
-                    device.data.sources = data.sources.sourceItem
+                    let filteredData = data.sources.sourceItem.filter((item) => item.attributes.status === 'READY' && item.attributes.source === 'PRODUCT')
+                    device.data.sources = filteredData.map((item) => item.attributes.sourceAccount)
+                    device.data.sourceValues = filteredData.map((item) => item.text)
                     resolve(device)
                 }
             })
@@ -180,6 +182,7 @@ module.exports = class SoundTouchDriver extends Driver {
                     reject(data.errors.error)
                 }
                 else {
+                    device.data.source = data.nowPlaying.attributes.sourceAccount
                     device.data.isPlaying = data.nowPlaying.playStatus && data.nowPlaying.playStatus.text === 'PLAY_STATE'
                     device.data.state = device.data.isPlaying ? 'pause' : 'play'
                     resolve(device)

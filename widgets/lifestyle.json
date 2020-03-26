@@ -17,14 +17,13 @@
           }
         },
         {
-          "type": "column",
-          "children": [
-            {
-              "type": "text",
-              "id": "power",
-              "value": "$power$"
-            }
-          ]
+          "type": "dropdown_button",
+          "id": "source",
+          "flex": 1,
+          "isExpanded": true,
+          "items": "$sourceValues$",
+          "values": "$sources$",
+          "value": "$source$"
         }
       ]
     },
