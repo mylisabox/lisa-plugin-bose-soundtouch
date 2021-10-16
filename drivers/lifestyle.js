@@ -1,9 +1,10 @@
-'use strict'
+import {createRequire} from 'module';
+import SoundTouchDriver from './soundtouch.js';
 
-const SoundTouchDriver = require('./soundtouch')
+const require = createRequire(import.meta.url);
 const lifestyleTemplate = require('../widgets/lifestyle.json')
 
-module.exports = class LifeStyleDriver extends SoundTouchDriver {
+export default class LifeStyleDriver extends SoundTouchDriver {
   constructor(lisa, plugin) {
     super(lisa, plugin)
     this.type = 'lifestyle'

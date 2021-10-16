@@ -6,11 +6,11 @@
     {
       "type": "image_button",
       "flex": 2,
-      "id": "power",
-      "value": "$power$",
+      "id": "powered",
+      "value": "$powered$",
       "values": {
-        "on": "/images/widgets/outlet_on.png",
-        "off": "/images/widgets/outlet_off.png"
+        "true": "/images/widgets/outlet_on.svg",
+        "false": "/images/widgets/outlet_off.svg"
       }
     },
     {
@@ -111,7 +111,7 @@
           "flex": 1,
           "width": 30,
           "height": 30,
-          "value": "/images/icons/media-step-backward.svg"
+          "value": "/images/widgets/previous.svg"
         },
         {
           "type": "image_button",
@@ -121,8 +121,8 @@
           "height": 30,
           "value": "$state$",
           "values": {
-            "pause": "/images/icons/media-pause.svg",
-            "play": "/images/icons/media-play.svg"
+            "pause": "/images/widgets/pause.svg",
+            "play": "/images/widgets/play.svg"
           }
         },
         {
@@ -131,7 +131,7 @@
           "width": 30,
           "height": 30,
           "flex": 1,
-          "value": "/images/icons/media-stop.svg"
+          "value": "/images/widgets/stop.svg"
         },
         {
           "type": "image_button",
@@ -139,7 +139,7 @@
           "height": 30,
           "id": "next",
           "flex": 1,
-          "value": "/images/icons/media-step-forward.svg"
+          "value": "/images/widgets/next.svg"
         }
       ]
     },
