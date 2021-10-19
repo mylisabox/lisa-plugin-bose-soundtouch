@@ -36,12 +36,12 @@ export default class SoundTouchPlugin extends Plugin {
       }
       break
     case 'DEVICE_TURN_ON':
-      key = 'power'
-      value = 'on'
+      key = 'powered'
+      value = true
       break
     case 'DEVICE_TURN_OFF':
-      key = 'power'
-      value = 'off'
+      key = 'powered'
+      value = false
       break
     case 'MUTE_VOLUME':
       break
